@@ -1,0 +1,33 @@
+Vagrant.configure("2") do |config|
+  username = ""
+  password = ""
+
+  if ARGV[0] == 'up'
+    print "Please insert your credentials for web GUI\n"
+    print "Username: "
+    username = STDIN.gets.chomp
+    print "Password (min 8 characters): "
+    password = STDIN.noecho(&:gets).chomp
+    print "\n"
+
+    while password.length < 8
+      print "Your password is too short, please choose a new password\n"
+      print "Password (min 8 characters): "
+      password = STDIN.noecho(&:gets).chomp
+    end
+  end
+
+  config.vm.box = "ubuntu/focal64"
+  config.vm.network "private_network", ip: "192.168.0.100"
+  
+  config.vm.provision :shell, path: "bootstrap.sh", :args => [username, password]
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 8192
+    v.cpus = 4
+    v.name = "gns"
+    v.customize ["modifyvm", :id, "--vram", "256"]
+    # v.gui = true # DEBUG
+    
+  end
+end
